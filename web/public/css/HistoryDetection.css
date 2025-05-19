@@ -1,0 +1,75 @@
+/* Popup lịch sử nhận diện */
+#classificationPopup {
+    width: 600px; /* Tăng chiều rộng để chứa nhiều hình ảnh hơn */
+    max-width: 90%;
+    max-height: 80vh; /* Giới hạn chiều cao tối đa */
+    overflow-y: auto; /* Cho phép cuộn dọc nếu nội dung quá dài */
+}
+
+/* Nội dung lịch sử nhận diện */
+#classificationHistoryContent {
+    max-height: 400px; /* Giới hạn chiều cao của bảng */
+    overflow-y: auto; /* Cho phép cuộn dọc */
+}
+
+/* Bảng trong popup */
+#classificationHistoryContent table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Cột chứa hình ảnh */
+#classificationHistoryContent th:nth-child(2),
+#classificationHistoryContent td:nth-child(2) {
+    width: 300px; /* Đặt chiều rộng cố định cho cột hình ảnh */
+    padding: 5px;
+}
+
+/* Container cho các hình ảnh */
+#classificationHistoryContent td:nth-child(2) {
+    display: flex;
+    flex-wrap: nowrap; /* Không cho phép xuống dòng */
+    overflow-x: auto; /* Cho phép cuộn ngang */
+    gap: 10px; /* Khoảng cách giữa các hình ảnh */
+    padding: 5px;
+    white-space: nowrap; /* Ngăn xuống dòng */
+}
+
+/* Hình ảnh trong bảng */
+#classificationHistoryContent td:nth-child(2) img {
+    width: 80px; /* Kích thước cố định */
+    height: 80px;
+    object-fit: cover; /* Đảm bảo hình ảnh không bị méo */
+    border-radius: 5px;
+    flex-shrink: 0; /* Ngăn hình ảnh bị co lại */
+}
+
+/* Thanh cuộn ngang */
+#classificationHistoryContent td:nth-child(2)::-webkit-scrollbar {
+    height: 8px;
+}
+
+#classificationHistoryContent td:nth-child(2)::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 4px;
+}
+
+#classificationHistoryContent td:nth-child(2)::-webkit-scrollbar-track {
+    background: var(--light-color);
+}
+
+/* Các cột khác */
+#classificationHistoryContent th,
+#classificationHistoryContent td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--accent-color);
+}
+
+#classificationHistoryContent th {
+    background: var(--primary-color);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}

@@ -1,0 +1,2389 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Application API",
+      "description": "API cho các chức năng quản trị và người dùng trong ứng dụng",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:8000",
+        "description": "Local development server"
+      }
+    ],
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "Hiển thị trang chủ",
+          "description": "Trả về trang chủ với danh sách tin tức và theme được cấu hình",
+          "operationId": "getHome",
+          "tags": ["Home"],
+          "responses": {
+            "200": {
+              "description": "Trang chủ với danh sách tin tức",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "news": {
+                        "type": "array",
+                        "items": { "type": "object" }
+                      },
+                      "theme": {
+                        "type": "string",
+                        "example": "index"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/auth/google": {
+        "get": {
+          "summary": "Chuyển hướng đến Google để đăng nhập",
+          "description": "Chuyển hướng người dùng đến trang đăng nhập Google",
+          "operationId": "redirectToGoogle",
+          "tags": ["Authentication"],
+          "responses": {
+            "302": {
+              "description": "Chuyển hướng đến trang đăng nhập Google",
+              "headers": {
+                "Location": {
+                  "schema": { "type": "string" },
+                  "description": "URL chuyển hướng"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/auth/google/callback": {
+        "get": {
+          "summary": "Xử lý callback từ Google",
+          "description": "Xử lý callback sau khi đăng nhập Google",
+          "operationId": "handleGoogleCallback",
+          "tags": ["Authentication"],
+          "responses": {
+            "302": {
+              "description": "Chuyển hướng đến dashboard hoặc trang lỗi",
+              "headers": {
+                "Location": {
+                  "schema": { "type": "string" },
+                  "description": "URL chuyển hướng"
+                }
+              }
+            },
+            "400": {
+              "description": "Lỗi đăng nhập Google",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Google login failed" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/login": {
+        "get": {
+          "summary": "Hiển thị form đăng nhập",
+          "description": "Trả về form đăng nhập cho người dùng",
+          "operationId": "showLoginForm",
+          "tags": ["Authentication"],
+          "responses": {
+            "200": {
+              "description": "Form đăng nhập",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            }
+          }
+        },
+        "post": {
+          "summary": "Xử lý đăng nhập",
+          "description": "Xác thực thông tin đăng nhập của người dùng",
+          "operationId": "login",
+          "tags": ["Authentication"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["email", "password"],
+                  "properties": {
+                    "email": { "type": "string", "format": "email" },
+                    "password": { "type": "string", "format": "password" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đăng nhập thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Đăng nhập thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/logout": {
+        "post": {
+          "summary": "Đăng xuất",
+          "description": "Đăng xuất người dùng hiện tại",
+          "operationId": "logout",
+          "tags": ["Authentication"],
+          "responses": {
+            "200": {
+              "description": "Đăng xuất thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "Logged out successfully" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/register": {
+        "get": {
+          "summary": "Hiển thị form đăng ký",
+          "description": "Trả về form đăng ký tài khoản",
+          "operationId": "showRegisterForm",
+          "tags": ["Authentication"],
+          "responses": {
+            "200": {
+              "description": "Form đăng ký",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            }
+          }
+        },
+        "post": {
+          "summary": "Xử lý đăng ký",
+          "description": "Tạo tài khoản người dùng mới",
+          "operationId": "register",
+          "tags": ["Authentication"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name", "email", "password", "password_confirmation"],
+                  "properties": {
+                    "name": { "type": "string", "maxLength": 255 },
+                    "email": { "type": "string", "format": "email" },
+                    "password": { "type": "string", "format": "password" },
+                    "password_confirmation": { "type": "string", "format": "password" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đăng ký thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Đăng ký thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/forgot-password": {
+        "get": {
+          "summary": "Hiển thị form quên mật khẩu",
+          "description": "Trả về form để yêu cầu đặt lại mật khẩu",
+          "operationId": "showForgotPasswordForm",
+          "tags": ["Authentication"],
+          "responses": {
+            "200": {
+              "description": "Form quên mật khẩu",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            }
+          }
+        }
+      },
+      "/reset-password": {
+        "post": {
+          "summary": "Đặt lại mật khẩu",
+          "description": "Xử lý yêu cầu đặt lại mật khẩu",
+          "operationId": "resetPassword",
+          "tags": ["Authentication"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["email", "password", "password_confirmation", "token"],
+                  "properties": {
+                    "email": { "type": "string", "format": "email" },
+                    "password": { "type": "string", "format": "password" },
+                    "password_confirmation": { "type": "string", "format": "password" },
+                    "token": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đặt lại mật khẩu thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Đặt lại mật khẩu thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      
+      "/check-auth": {
+        "get": {
+          "summary": "Kiểm tra xác thực với thông tin người dùng (Sanctum)",
+          "description": "Kiểm tra trạng thái xác thực và trả về thông tin người dùng",
+          "operationId": "checkAuthSanctum",
+          "tags": ["Authentication"],
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": {
+              "description": "Thông tin xác thực và người dùng",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "authenticated": { "type": "boolean", "example": true },
+                      "user": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/dashboard": {
+        "get": {
+          "summary": "Hiển thị dashboard người dùng",
+          "description": "Trả về dashboard với thông tin người dùng và bình luận",
+          "operationId": "getDashboard",
+          "tags": ["Dashboard"],
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": {
+              "description": "Dashboard người dùng",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            },
+            "403": {
+              "description": "Truy cập không được phép",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Unauthorized" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/news": {
+        "get": {
+          "summary": "Lấy danh sách tin tức",
+          "description": "Trả về danh sách các bài tin tức",
+          "operationId": "getNews",
+          "tags": ["News"],
+          "responses": {
+            "200": {
+              "description": "Danh sách tin tức",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "summary": "Tạo bài tin tức mới",
+          "description": "Tạo một bài tin tức mới (yêu cầu xác thực)",
+          "operationId": "createNews",
+          "tags": ["News"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["title", "content"],
+                  "properties": {
+                    "title": { "type": "string", "maxLength": 255 },
+                    "content": { "type": "string" },
+                    "image": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Tạo tin tức thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Tạo tin tức thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/news/{id}": {
+        "get": {
+          "summary": "Xem chi tiết tin tức",
+          "description": "Trả về chi tiết một bài tin tức",
+          "operationId": "getNewsDetail",
+          "tags": ["News"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của bài tin tức",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Chi tiết bài tin tức",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy bài tin tức",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "News not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "summary": "Cập nhật bài tin tức",
+          "description": "Cập nhật thông tin bài tin tức (yêu cầu xác thực)",
+          "operationId": "updateNews",
+          "tags": ["News"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của bài tin tức",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["title", "content"],
+                  "properties": {
+                    "title": { "type": "string", "maxLength": 255 },
+                    "content": { "type": "string" },
+                    "image": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật tin tức thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Cập nhật tin tức thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy bài tin tức",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "News not found" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "summary": "Xóa bài tin tức",
+          "description": "Xóa một bài tin tức (yêu cầu xác thực)",
+          "operationId": "deleteNews",
+          "tags": ["News"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của bài tin tức",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Xóa tin tức thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Xóa tin tức thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy bài tin tức",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "News not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/predict": {
+        "post": {
+          "summary": "Dự đoán hình ảnh gốm",
+          "description": "Xử lý hình ảnh để dự đoán loại gốm",
+          "operationId": "predict",
+          "tags": ["Prediction"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "required": ["image"],
+                  "properties": {
+                    "image": { "type": "string", "format": "binary", "description": "Tệp hình ảnh gốm" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Kết quả dự đoán",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "prediction": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/predict-image": {
+        "post": {
+          "summary": "Dự đoán hình ảnh gốm (tương tự /predict)",
+          "description": "Xử lý hình ảnh để dự đoán loại gốm",
+          "operationId": "predictImage",
+          "tags": ["Prediction"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "required": ["image"],
+                  "properties": {
+                    "image": { "type": "string", "format": "binary", "description": "Tệp hình ảnh gốm" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Kết quả dự đoán",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "prediction": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/classify": {
+        "post": {
+          "summary": "Phân loại hình ảnh gốm",
+          "description": "Phân loại hình ảnh gốm dựa trên mô hình AI",
+          "operationId": "classify",
+          "tags": ["Prediction"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "required": ["image"],
+                  "properties": {
+                    "image": { "type": "string", "format": "binary", "description": "Tệp hình ảnh gốm" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Kết quả phân loại",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "classification": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/classification/{id}/info": {
+        "get": {
+          "summary": "Xem thông tin chi tiết nhận diện",
+          "description": "Trả về thông tin chi tiết của một kết quả nhận diện",
+          "operationId": "getClassificationInfo",
+          "tags": ["Prediction"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của kết quả nhận diện",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Thông tin chi tiết nhận diện",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy kết quả nhận diện",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Classification not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/gallery": {
+        "get": {
+          "summary": "Hiển thị thư viện gốm",
+          "description": "Trả về danh sách các món đồ gốm trong thư viện",
+          "operationId": "getGallery",
+          "tags": ["Ceramic"],
+          "responses": {
+            "200": {
+              "description": "Danh sách món đồ gốm",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/ceramics/{id}": {
+        "get": {
+          "summary": "Xem chi tiết món đồ gốm",
+          "description": "Trả về thông tin chi tiết của một món đồ gốm",
+          "operationId": "getCeramic",
+          "tags": ["Ceramic"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của món đồ gốm",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Chi tiết món đồ gốm",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy món đồ gốm",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Ceramic not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/recharge": {
+        "get": {
+          "summary": "Hiển thị trang nạp tiền",
+          "description": "Trả về trang nạp tiền với danh sách gói nạp",
+          "operationId": "getRecharge",
+          "tags": ["Recharge"],
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": {
+              "description": "Trang nạp tiền với danh sách gói nạp",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "packages": {
+                        "type": "array",
+                        "items": { "type": "object" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Truy cập không được phép",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Unauthorized" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "summary": "Gửi yêu cầu nạp tiền",
+          "description": "Gửi yêu cầu nạp tiền với thông tin gói nạp",
+          "operationId": "submitRecharge",
+          "tags": ["Recharge"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["package_id", "amount"],
+                  "properties": {
+                    "package_id": { "type": "integer", "description": "ID của gói nạp" },
+                    "amount": { "type": "number", "description": "Số tiền nạp" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Gửi yêu cầu nạp tiền thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Yêu cầu nạp tiền đã được gửi!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/recharge/verify": {
+        "post": {
+          "summary": "Xác minh CAPTCHA khi nạp tiền",
+          "description": "Xác minh mã CAPTCHA để tiếp tục nạp tiền",
+          "operationId": "verifyRecharge",
+          "tags": ["Recharge"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["captcha_response"],
+                  "properties": {
+                    "captcha_response": { "type": "string", "description": "Mã phản hồi CAPTCHA" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Xác minh CAPTCHA thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Xác minh CAPTCHA thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực CAPTCHA",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "CAPTCHA verification failed" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/recharge/export/{id}": {
+        "get": {
+          "summary": "Xuất biên lai nạp tiền",
+          "description": "Xuất biên lai của một yêu cầu nạp tiền dưới dạng PDF hoặc Excel",
+          "operationId": "exportReceipt",
+          "tags": ["Recharge"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của yêu cầu nạp tiền",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Tệp biên lai (PDF hoặc Excel)",
+              "content": {
+                "application/pdf": { "schema": { "type": "string", "format": "binary" } }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy yêu cầu nạp tiền",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Recharge request not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/recharge/message": {
+        "post": {
+          "summary": "Gửi tin nhắn liên quan đến nạp tiền",
+          "description": "Gửi tin nhắn liên quan đến yêu cầu nạp tiền",
+          "operationId": "sendRechargeMessage",
+          "tags": ["Recharge"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["request_id", "message"],
+                  "properties": {
+                    "request_id": { "type": "integer", "description": "ID của yêu cầu nạp tiền" },
+                    "message": { "type": "string", "description": "Nội dung tin nhắn", "maxLength": 500 }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Gửi tin nhắn thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Tin nhắn đã được gửi!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/use-token": {
+        "post": {
+          "summary": "Sử dụng token của người dùng",
+          "description": "Giảm số lượng token của người dùng",
+          "operationId": "useToken",
+          "tags": ["Token"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["amount"],
+                  "properties": {
+                    "amount": { "type": "integer", "description": "Số lượng token muốn sử dụng" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Sử dụng token thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Sử dụng token thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực hoặc không đủ token",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Not enough tokens" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/submit-rating": {
+        "post": {
+          "summary": "Gửi đánh giá từ người dùng",
+          "description": "Người dùng gửi đánh giá và bình luận",
+          "operationId": "submitRating",
+          "tags": ["User"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["rating", "comment"],
+                  "properties": {
+                    "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+                    "comment": { "type": "string", "maxLength": 500, "nullable": true }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Gửi đánh giá thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Đánh giá đã được gửi!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/change-name": {
+        "post": {
+          "summary": "Thay đổi tên người dùng",
+          "description": "Cập nhật tên của người dùng",
+          "operationId": "changeName",
+          "tags": ["User"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name": { "type": "string", "maxLength": 255 }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Thay đổi tên thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Tên đã được cập nhật!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/password/change": {
+        "get": {
+          "summary": "Hiển thị form đổi mật khẩu",
+          "description": "Trả về form để đổi mật khẩu",
+          "operationId": "showChangePasswordForm",
+          "tags": ["User"],
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": {
+              "description": "Form đổi mật khẩu",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            }
+          }
+        },
+        "post": {
+          "summary": "Thay đổi mật khẩu",
+          "description": "Cập nhật mật khẩu của người dùng",
+          "operationId": "changePassword",
+          "tags": ["User"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["current_password", "new_password", "new_password_confirmation"],
+                  "properties": {
+                    "current_password": { "type": "string", "format": "password" },
+                    "new_password": { "type": "string", "format": "password" },
+                    "new_password_confirmation": { "type": "string", "format": "password" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Thay đổi mật khẩu thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Mật khẩu đã được thay đổi!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/update-user-info": {
+        "post": {
+          "summary": "Cập nhật thông tin người dùng",
+          "description": "Cập nhật thông tin cá nhân của người dùng",
+          "operationId": "updateUserInfo",
+          "tags": ["User"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name", "email"],
+                  "properties": {
+                    "name": { "type": "string", "maxLength": 255 },
+                    "email": { "type": "string", "format": "email" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật thông tin thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Thông tin người dùng đã được cập nhật!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/terms-and-conditions": {
+        "get": {
+          "summary": "Lấy điều khoản và chính sách",
+          "description": "Trả về nội dung điều khoản và chính sách",
+          "operationId": "getTerms",
+          "tags": ["Terms"],
+          "responses": {
+            "200": {
+              "description": "Nội dung điều khoản",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "content": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/guide": {
+        "get": {
+          "summary": "Hiển thị trang hướng dẫn",
+          "description": "Trả về trang hướng dẫn sử dụng",
+          "operationId": "getGuide",
+          "tags": ["Guide"],
+          "responses": {
+            "200": {
+              "description": "Trang hướng dẫn",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            }
+          }
+        }
+      },
+      "/contact/submit": {
+        "post": {
+          "summary": "Gửi thông tin liên hệ",
+          "description": "Gửi thông tin liên hệ từ người dùng",
+          "operationId": "submitContact",
+          "tags": ["Contact"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name", "email", "message"],
+                  "properties": {
+                    "name": { "type": "string", "maxLength": 255 },
+                    "email": { "type": "string", "format": "email" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Gửi liên hệ thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Thông tin liên hệ đã được gửi!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin": {
+        "get": {
+          "summary": "Lấy dữ liệu bảng điều khiển quản trị",
+          "description": "Trả về dữ liệu cho bảng điều khiển quản trị",
+          "operationId": "getAdminDashboard",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": {
+              "description": "Dữ liệu bảng điều khiển quản trị",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "users": { "type": "array", "items": { "type": "object" } },
+                      "rechargeRequests": { "type": "array", "items": { "type": "object" } },
+                      "totalRevenue": { "type": "number", "example": 1000000 },
+                      "averageRating": { "type": "number", "example": 4.5 },
+                      "revenueLabels": { "type": "array", "items": { "type": "string" } },
+                      "revenueData": { "type": "array", "items": { "type": "number" } },
+                      "chatUsers": { "type": "array", "items": { "type": "object" } },
+                      "transactionHistory": { "type": "array", "items": { "type": "object" } },
+                      "ceramics": { "type": "array", "items": { "type": "object" } },
+                      "terms": { "type": "object" },
+                      "recaptchaEnabled": { "type": "boolean" },
+                      "contacts": { "type": "array", "items": { "type": "object" } },
+                      "news": { "type": "array", "items": { "type": "object" } },
+                      "totalTokenUsed": { "type": "integer" },
+                      "tokenTrend": { "type": "object" },
+                      "packages": { "type": "array", "items": { "type": "object" } },
+                      "llmModel": { "type": "string" },
+                      "availableModels": { "type": "array", "items": { "type": "string" } },
+                      "latestApk": { "type": "object" },
+                      "recognitionModel": { "type": "string" },
+                      "availableRecognitionModels": { "type": "array", "items": { "type": "string" } }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Truy cập không được phép",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Unauthorized" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/edit/{id}": {
+        "get": {
+          "summary": "Lấy dữ liệu người dùng để chỉnh sửa",
+          "description": "Trả về dữ liệu người dùng để chỉnh sửa trong bảng điều khiển admin",
+          "operationId": "editUser",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của người dùng",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Dữ liệu người dùng để chỉnh sửa",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "User not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/users/{id}": {
+        "put": {
+          "summary": "Cập nhật dữ liệu người dùng",
+          "description": "Cập nhật thông tin người dùng trong bảng điều khiển admin",
+          "operationId": "updateUser",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của người dùng",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name", "email", "role", "tokens", "status"],
+                  "properties": {
+                    "name": { "type": "string", "maxLength": 255 },
+                    "email": { "type": "string", "format": "email" },
+                    "role": { "type": "string", "enum": ["user", "admin"] },
+                    "tokens": { "type": "integer", "minimum": 0 },
+                    "status": { "type": "string", "enum": ["active", "inactive"] }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật người dùng thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Cập nhật người dùng thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "User not found" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "summary": "Xóa người dùng",
+          "description": "Xóa một người dùng khỏi hệ thống",
+          "operationId": "deleteUser",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của người dùng",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Xóa người dùng thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Người dùng đã được xóa thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "User not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/update/{id}": {
+        "put": {
+          "summary": "Cập nhật dữ liệu người dùng (tương tự /admin/users/{id})",
+          "description": "Cập nhật thông tin người dùng trong bảng điều khiển admin",
+          "operationId": "updateUserAlt",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của người dùng",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name", "email", "role", "tokens", "status"],
+                  "properties": {
+                    "name": { "type": "string", "maxLength": 255 },
+                    "email": { "type": "string", "format": "email" },
+                    "role": { "type": "string", "enum": ["user", "admin"] },
+                    "tokens": { "type": "integer", "minimum": 0 },
+                    "status": { "type": "string", "enum": ["active", "inactive"] }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật người dùng thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Cập nhật người dùng thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "User not found" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/delete/{id}": {
+        "delete": {
+          "summary": "Xóa người dùng (tương tự /admin/users/{id})",
+          "description": "Xóa một người dùng khỏi hệ thống",
+          "operationId": "deleteUserAlt",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của người dùng",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Xóa người dùng thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Người dùng đã được xóa thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "User not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/recharge/approve/{id}": {
+        "post": {
+          "summary": "Chấp nhận yêu cầu nạp tiền",
+          "description": "Chấp nhận một yêu cầu nạp tiền từ người dùng",
+          "operationId": "approveRecharge",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của yêu cầu nạp tiền",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Yêu cầu nạp tiền đã được chấp nhận",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Yêu cầu nạp tiền đã được xác nhận!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy yêu cầu nạp tiền",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Recharge request not found" }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Yêu cầu đã được xử lý",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Yêu cầu này đã được xử lý!" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/recharge/reject": {
+        "post": {
+          "summary": "Từ chối yêu cầu nạp tiền",
+          "description": "Từ chối một yêu cầu nạp tiền và gửi lý do",
+          "operationId": "rejectRecharge",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["request_id", "reason"],
+                  "properties": {
+                    "request_id": { "type": "integer", "description": "ID của yêu cầu nạp tiền" },
+                    "reason": { "type": "string", "description": "Lý do từ chối", "maxLength": 500 }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Yêu cầu nạp tiền đã được từ chối",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Đã từ chối yêu cầu và gửi tin nhắn cho người dùng!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy yêu cầu nạp tiền",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Recharge request not found" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/ceramics": {
+        "post": {
+          "summary": "Tạo món đồ gốm mới",
+          "description": "Thêm một món đồ gốm mới vào thư viện",
+          "operationId": "storeCeramic",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name": { "type": "string", "maxLength": 255 },
+                    "description": { "type": "string", "nullable": true },
+                    "image": { "type": "string", "maxLength": 255, "nullable": true },
+                    "category": { "type": "string", "maxLength": 255, "nullable": true },
+                    "origin": { "type": "string", "maxLength": 255, "nullable": true }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Tạo món đồ gốm thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Thêm món đồ gốm thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/ceramics/{id}": {
+        "put": {
+          "summary": "Cập nhật món đồ gốm",
+          "description": "Cập nhật thông tin của một món đồ gốm",
+          "operationId": "updateCeramic",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của món đồ gốm",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name": { "type": "string", "maxLength": 255 },
+                    "description": { "type": "string", "nullable": true },
+                    "image": { "type": "string", "maxLength": 255, "nullable": true },
+                    "category": { "type": "string", "maxLength": 255, "nullable": true },
+                    "origin": { "type": "string", "maxLength": 255, "nullable": true }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật món đồ gốm thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Cập nhật món đồ gốm thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy món đồ gốm",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Ceramic item not found" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "summary": "Xóa món đồ gốm",
+          "description": "Xóa một món đồ gốm khỏi thư viện",
+          "operationId": "deleteCeramic",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID của món đồ gốm",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Xóa món đồ gốm thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Xóa món đồ gốm thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy món đồ gốm",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "Ceramic item not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/terms": {
+        "get": {
+          "summary": "Lấy điều khoản và chính sách cho admin",
+          "description": "Trả về điều khoản và chính sách để chỉnh sửa",
+          "operationId": "getAdminTerms",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": {
+              "description": "Điều khoản và chính sách",
+              "content": {
+                "application/json": { "schema": { "type": "object" } }
+              }
+            }
+          }
+        }
+      },
+      "/admin/terms/update": {
+        "post": {
+          "summary": "Cập nhật điều khoản và chính sách",
+          "description": "Cập nhật nội dung điều khoản và chính sách",
+          "operationId": "updateTerms",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["content"],
+                  "properties": {
+                    "content": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật điều khoản thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": { "type": "string", "example": "Chính sách và điều khoản đã được cập nhật!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/export-transaction-history": {
+        "get": {
+          "summary": "Xuất lịch sử giao dịch sang Excel",
+          "description": "Xuất lịch sử giao dịch của hệ thống dưới dạng tệp Excel",
+          "operationId": "exportTransactionHistory",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "start_date",
+              "in": "query",
+              "description": "Ngày bắt đầu lọc (YYYY-MM-DD)",
+              "schema": { "type": "string", "format": "date" }
+            },
+            {
+              "name": "end_date",
+              "in": "query",
+              "description": "Ngày kết thúc lọc (YYYY-MM-DD)",
+              "schema": { "type": "string", "format": "date" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Tệp Excel chứa lịch sử giao dịch",
+              "content": {
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                  "schema": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/settings/captcha": {
+        "post": {
+          "summary": "Cập nhật cài đặt CAPTCHA",
+          "description": "Bật hoặc tắt tính năng CAPTCHA",
+          "operationId": "updateCaptchaSetting",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["recaptcha_enabled"],
+                  "properties": {
+                    "recaptcha_enabled": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật cài đặt CAPTCHA thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "captcha_success": { "type": "string", "example": "Cài đặt CAPTCHA đã được cập nhật thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/users/{user}/token-usage": {
+        "get": {
+          "summary": "Hiển thị lịch sử sử dụng token của người dùng",
+          "description": "Trả về lịch sử sử dụng token của một người dùng",
+          "operationId": "showTokenUsage",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "user",
+              "in": "path",
+              "required": true,
+              "description": "ID của người dùng",
+              "schema": { "type": "integer" }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lịch sử sử dụng token",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "user": { "type": "object" },
+                      "tokenUsages": { "type": "array", "items": { "type": "object" } }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "string", "example": "User not found" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/settings/theme": {
+        "post": {
+          "summary": "Cập nhật cài đặt giao diện",
+          "description": "Cập nhật giao diện hiển thị của ứng dụng",
+          "operationId": "updateTheme",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["theme"],
+                  "properties": {
+                    "theme": { "type": "string", "enum": ["index", "index2"] }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật giao diện thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "theme_success": { "type": "string", "example": "Giao diện đã được cập nhật thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/settings/timezone": {
+        "post": {
+          "summary": "Cập nhật cài đặt múi giờ",
+          "description": "Cập nhật múi giờ của ứng dụng",
+          "operationId": "updateTimezone",
+          "tags": ["Admin"],
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["timezone"],
+                  "properties": {
+                    "timezone": { "type": "string", "example": "Asia/Ho_Chi_Minh" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật múi giờ thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "timezone_success": { "type": "string", "example": "Múi giờ đã được cập nhật thành công!" }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Lỗi xác thực",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": { "type": "object" }
+                    }                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }

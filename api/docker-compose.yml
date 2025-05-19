@@ -1,0 +1,40 @@
+services:
+  ndk-213802_container:
+    build:
+      context: D:/PY_Code/Ceramic_Detection
+      dockerfile: Dockerfile
+    image: sys_55001
+    container_name: ndk-213802_container
+    ports:
+      - "55001:55001"
+#    deploy:
+#      resources:
+#        reservations:
+#          devices:
+#            - driver: nvidia
+#              count: 1
+#              capabilities: [ gpu ]
+    volumes:
+      - D:/PY_Code/Ceramic_Detection:/app
+    networks:
+      - ceramic-network
+networks:
+  ceramic-network:
+    driver: bridge
+
+#services:
+#  ndk-213802_container:
+#    build:
+#      context: /mnt/d/PY_Code/Ceramic_Detection
+#      dockerfile: Dockerfile
+#    image: ndk-213802
+#    container_name: ndk-213802_container
+#    ports:
+#      - "55001:55001"
+#    volumes:
+#      - /mnt/d/PY_Code/Ceramic_Detection:/app
+#    networks:
+#      - ceramic-network
+#networks:
+#  ceramic-network:
+#    driver: bridge

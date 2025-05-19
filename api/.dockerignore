@@ -1,0 +1,56 @@
+.venv/
+.venv2/
+faiss_index
+tests
+xception_66class_model
+*.pyc
+__pycache__
+*.swp
+*.egg-info
+.DS_Store
+
+docker-compose.yml
+
+
+logs/
+*.log
+*.h5
+# Bỏ qua thư mục dữ liệu tạm
+tmp/
+temp/
+
+
+config/local/
+
+.dockerignore
+
+*.pyo
+*.pyd
+.Python
+env
+venv
+
+.eggs
+dist
+build
+
+.git
+.gitignore
+vc.py
+
+*.tmp
+*.bak
+*.swo
+# Loại trừ các thư mục không cần thiết
+__pycache__/
+
+
+# Loại trừ các file cấu hình IDE
+.vscode/
+.idea/
+
+# Loại trừ file hoặc thư mục khác
+
+node_modules/
+.env
+ultis/
