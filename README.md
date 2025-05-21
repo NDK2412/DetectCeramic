@@ -23,14 +23,7 @@ Ceramic AI là một hệ thống trí tuệ nhân tạo tiên tiến giúp nh�
 - **Trình duyệt**: Chrome, Firefox, Safari (phiên bản mới nhất)
 - **API Key**: Yêu cầu API Key cho mô hình LLM (nếu sử dụng AI bên thứ ba).
 
-### Android
-- **Hệ điều hành**: Android 5.0 (Lollipop) trở lên
-- **Thư viện**:
-  - AndroidX
-  - CardView (`androidx.cardview:cardview:1.0.0`)
-- **Công cụ phát triển**:
-  - Android Studio
-  - Gradle
+
 
 ## Hướng dẫn cài đặt
 
@@ -115,6 +108,8 @@ Ceramic AI là một hệ thống trí tuệ nhân tạo tiên tiến giúp nh�
    - Truy cập `/admin/llm-settings`.
    - Chọn mô hình LLM từ danh sách và nhập API Key.
    - Nhấn **Lưu cài đặt**.
+   - docker pull ndk2412/ceramicdetect   #image docker API 
+   - 
 
 ### 2. Sử dụng ứng dụng Android
 1. **Mở ứng dụng**:
@@ -169,7 +164,7 @@ Nếu bạn gặp vấn đề hoặc có ý kiến đóng góp, vui lòng liên 
 
 - **Email**: khangkhang1111777@gmail.com
 - **SĐT**: 
-- **Facebook**: [facebook.com/ceramic](https://facebook.com/ceramic)
+- **Facebook**:
 - **Địa chỉ**: 
 
 Bạn cũng có thể gửi phản hồi qua biểu mẫu liên hệ trong mục **Contact** trên trang web.
